@@ -7,6 +7,7 @@ package kmip
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -273,9 +274,14 @@ func (s *Server) serve(conn net.Conn, session string) {
 		if err == io.EOF {
 			break
 		}
+		
+		println("Hello!!!")
 
 		if err != nil {
-			s.Log.Printf("[ERROR] [%s] Error decoding KMIP message: %s", session, err)
+			readBytes := d.rb.Bytes()
+			rbs := base64.StdEncoding.EncodeToString(readBytes)
+			println(rbs)
+			s.Log.Printf("[---ERROR---] [%s] Error decoding KMIP message: %s : %s", session, rbs, err)
 			break
 		}
 

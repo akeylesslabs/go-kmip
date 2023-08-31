@@ -6,6 +6,7 @@ package kmip
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"io"
 	"io/ioutil"
@@ -22,6 +23,8 @@ type Decoder struct {
 	r io.Reader
 	s io.ByteScanner
 
+	rb *bytes.Buffer
+
 	lastTag Tag
 }
 
@@ -37,7 +40,8 @@ func NewDecoder(r io.Reader) *Decoder {
 	if s, ok := r.(io.ByteScanner); ok {
 		d.s = s
 	} else {
-		br := bufio.NewReader(r)
+		d.rb = new(bytes.Buffer)
+		br := bufio.NewReader(io.TeeReader(r, d.rb))
 		d.r = br
 		d.s = br
 	}
@@ -162,6 +166,7 @@ func (d *Decoder) Decode(v interface{}) error {
 	}
 
 	_, err = d.decode(rv, structDesc)
+
 	return err
 }
 
