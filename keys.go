@@ -88,6 +88,13 @@ type PrivateKey struct {
 	KeyBlock KeyBlock `kmip:"KEY_BLOCK,required"`
 }
 
+type SecretData struct {
+	Tag `kmip:"SECRET_DATA"`
+
+	SecretDataType Enum     `kmip:"SECRET_DATA_TYPE,required"`
+	KeyBlock       KeyBlock `kmip:"KEY_BLOCK,required"`
+}
+
 // KeyBlock is a Key Block Object Structure
 type KeyBlock struct {
 	Tag `kmip:"KEY_BLOCK"`
