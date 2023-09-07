@@ -280,10 +280,13 @@ func (s *Server) serve(conn net.Conn, session string) {
 		if err != nil {
 			readBytes := d.rb.Bytes()
 			rbs := base64.StdEncoding.EncodeToString(readBytes)
-			println(rbs)
 			s.Log.Printf("[---ERROR---] [%s] Error decoding KMIP message: %s : %s", session, rbs, err)
 			break
 		}
+
+		readBytes := d.rb.Bytes()
+		rbs := base64.StdEncoding.EncodeToString(readBytes)
+		s.Log.Printf("[---INFO---] [%s] successfuly decoded KMIP message: %s", session, rbs)
 
 		var resp *Response
 
