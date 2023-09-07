@@ -6,6 +6,7 @@ package kmip
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/hex"
 	"strings"
 	"testing"
@@ -174,8 +175,15 @@ func (s *DecoderSuite) TestDecodeStructSkipAny() {
 func (s *DecoderSuite) TestDecodeMessageCreate() {
 	var m Request
 
-	err := NewDecoder(bytes.NewReader(messageCreate)).Decode(&m)
+	msg, err := base64.StdEncoding.DecodeString("QgB4AQAAATBCAHcBAAAAOEIAaQEAAAAgQgBqAgAAAAQAAAABAAAAAEIAawIAAAAEAAAAAAAAAABCAA0CAAAABAAAAAEAAAAAQgAPAQAAAOhCAFwFAAAABAAAAAMAAAAAQgB5AQAAANBCAFcFAAAABAAAAAcAAAAAQgCRAQAAADhCAAgBAAAAMEIACgcAAAAYQ3J5cHRvZ3JhcGhpYyBVc2FnZSBNYXNrQgALAgAAAAQAAAACAAAAAEIAhQEAAAB4QgCGBQAAAAQAAAABAAAAAEIAQAEAAABgQgBCBQAAAAQAAAACAAAAAEIARQEAAABIQgBDCAAAAECkIcqO/UuDAiaXEfYueDIWjSc77L/VaPxp0zYAbloXGcG4xbCq0xQ7ff4dmQyefwtyPgoQacsi0+AHKvFjFkn7")
 	s.Assert().NoError(err)
+	err = NewDecoder(bytes.NewReader(msg)).Decode(&m)
+	s.Assert().NoError(err)
+
+	v := m.BatchItems[0].RequestPayload.(RegisterRequest).SecretData.KeyBlock.Value.KeyMaterial
+	p := base64.StdEncoding.EncodeToString(v)
+	print(p)
+
 	s.Assert().Equal(
 		Request{
 			Header: RequestHeader{
