@@ -264,6 +264,7 @@ func (s *Server) serve(conn net.Conn, session string) {
 	e := NewEncoder(conn)
 
 	for {
+		s.Log.Printf("[---INFO---] starting new request")
 		var req = &Request{}
 
 		if s.ReadTimeout != 0 {
@@ -272,10 +273,9 @@ func (s *Server) serve(conn net.Conn, session string) {
 
 		err := d.Decode(req)
 		if err == io.EOF {
+			s.Log.Printf("[---INFO---] EOF, might be error")
 			break
 		}
-		
-		println("Hello!!!")
 
 		if err != nil {
 			readBytes := d.rb.Bytes()
@@ -286,6 +286,9 @@ func (s *Server) serve(conn net.Conn, session string) {
 		}
 
 		var resp *Response
+
+		s.Log.Printf("[---INFO---] handling response")
+
 		resp, err = s.handleBatch(sessionCtx, req)
 		if err != nil {
 			s.Log.Printf("[ERROR] [%s] Fatal error handling batch: %s", session, err)
@@ -296,10 +299,14 @@ func (s *Server) serve(conn net.Conn, session string) {
 			_ = conn.SetWriteDeadline(time.Now().Add(s.WriteTimeout))
 		}
 
+		s.Log.Printf("[---INFO---] writing response")
+
 		err = e.Encode(resp)
 		if err != nil {
 			s.Log.Printf("[ERROR] [%s] Error encoding KMIP response: %s", session, err)
 		}
+
+		s.Log.Printf("[---INFO---] done with request")
 	}
 }
 
