@@ -279,6 +279,78 @@ func (s *DecoderSuite) TestDecodeMessageCreateKeyPair() {
 		}, m)
 }
 
+func (s *DecoderSuite) TestDecodeMessageCreateOpaque() {
+	var m Request
+
+	decoder := NewDecoder(bytes.NewReader(messageCreateOpaque))
+
+	err := decoder.Decode(&m)
+	s.Assert().NoError(err)
+
+	s.Assert().Equal(
+		Request{
+			Header: RequestHeader{
+				Version:    ProtocolVersion{Major: 1, Minor: 1},
+				BatchCount: 1,
+			},
+			BatchItems: []RequestBatchItem{
+				{
+					Operation: OPERATION_CREATE,
+					RequestPayload: CreateRequest{
+						ObjectType: OBJECT_TYPE_OPAQUE_DATA,
+						TemplateAttribute: TemplateAttribute{
+							Attributes: []Attribute{
+								{
+									Name: ATTRIBUTE_NAME_NAME,
+									Value: Name{
+										Value: "test_opaque",
+										Type:  NAME_TYPE_UNINTERPRETED_TEXT_STRING,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}, m)
+}
+
+func (s *DecoderSuite) TestDecodeMessageCreateCertificate() {
+	var m Request
+
+	decoder := NewDecoder(bytes.NewReader(messageCreateCertificate))
+
+	err := decoder.Decode(&m)
+	s.Assert().NoError(err)
+
+	s.Assert().Equal(
+		Request{
+			Header: RequestHeader{
+				Version:    ProtocolVersion{Major: 1, Minor: 1},
+				BatchCount: 1,
+			},
+			BatchItems: []RequestBatchItem{
+				{
+					Operation: OPERATION_CREATE,
+					RequestPayload: CreateRequest{
+						ObjectType: OBJECT_TYPE_CERTIFICATE,
+						TemplateAttribute: TemplateAttribute{
+							Attributes: []Attribute{
+								{
+									Name: ATTRIBUTE_NAME_NAME,
+									Value: Name{
+										Value: "certificate",
+										Type:  NAME_TYPE_UNINTERPRETED_TEXT_STRING,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}, m)
+}
+
 func (s *DecoderSuite) TestDecodeMessageCreateWithAuthentication() {
 	var m Request
 	var buf bytes.Buffer

@@ -185,6 +185,72 @@ func (s *EncoderSuite) TestEncodeMessageCreate() {
 	s.Assert().EqualValues(messageCreate, buf.Bytes())
 }
 
+func (s *EncoderSuite) TestEncodeMessageCreateOpaque() {
+	var buf bytes.Buffer
+	createRequest := Request{
+		Header: RequestHeader{
+			Version:    ProtocolVersion{Major: 1, Minor: 1},
+			BatchCount: 1,
+		},
+		BatchItems: []RequestBatchItem{
+			{
+				Operation: OPERATION_CREATE,
+				RequestPayload: CreateRequest{
+					ObjectType: OBJECT_TYPE_OPAQUE_DATA,
+					TemplateAttribute: TemplateAttribute{
+						Attributes: []Attribute{
+							{
+								Name: ATTRIBUTE_NAME_NAME,
+								Value: Name{
+									Value: "test_opaque",
+									Type:  NAME_TYPE_UNINTERPRETED_TEXT_STRING,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := NewEncoder(&buf).Encode(&createRequest)
+	s.Assert().NoError(err)
+	s.Assert().EqualValues(messageCreateOpaque, buf.Bytes())
+}
+
+func (s *EncoderSuite) TestEncodeMessageCreateCertificate() {
+	var buf bytes.Buffer
+	createRequest := Request{
+		Header: RequestHeader{
+			Version:    ProtocolVersion{Major: 1, Minor: 1},
+			BatchCount: 1,
+		},
+		BatchItems: []RequestBatchItem{
+			{
+				Operation: OPERATION_CREATE,
+				RequestPayload: CreateRequest{
+					ObjectType: OBJECT_TYPE_CERTIFICATE,
+					TemplateAttribute: TemplateAttribute{
+						Attributes: []Attribute{
+							{
+								Name: ATTRIBUTE_NAME_NAME,
+								Value: Name{
+									Value: "certificate",
+									Type:  NAME_TYPE_UNINTERPRETED_TEXT_STRING,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	err := NewEncoder(&buf).Encode(&createRequest)
+	s.Assert().NoError(err)
+	s.Assert().EqualValues(messageCreateCertificate, buf.Bytes())
+}
+
 func (s *EncoderSuite) TestEncodeMessageCreateKeyPair() {
 	var buf bytes.Buffer
 
