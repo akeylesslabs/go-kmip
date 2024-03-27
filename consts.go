@@ -1274,3 +1274,11 @@ var operationMap = map[Enum]string{
 	OPERATION_INTEROP:              "OPERATION_INTEROP",
 	OPERATION_REPROVISION:          "OPERATION_REPROVISION",
 }
+
+// 9.1.3.2.6 Certificate Type Enumeration
+const (
+	X_509 Enum = 0x00000001
+	PGP   Enum = 0x00000002
+)
+
+const OpaqueDataType_NONE Enum = 0x80000000

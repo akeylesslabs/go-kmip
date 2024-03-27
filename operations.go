@@ -53,6 +53,8 @@ type GetResponse struct {
 	SymmetricKey SymmetricKey `kmip:"SYMMETRIC_KEY"`
 	PrivateKey   PrivateKey   `kmip:"PRIVATE_KEY"`
 	PublicKey    PublicKey    `kmip:"PUBLIC_KEY"`
+	Certificate  Certificate  `kmip:"CERTIFICATE"`
+	OpaqueObject OpaqueObject `kmip:"OPAQUE_OBJECT"`
 }
 
 // GetAttributesRequest is a Get Attributes Request Payload
@@ -198,6 +200,8 @@ type RegisterRequest struct {
 	SymmetricKey SymmetricKey `kmip:"SYMMETRIC_KEY"`
 	PrivateKey   PrivateKey   `kmip:"PRIVATE_KEY"`
 	PublicKey    PublicKey    `kmip:"PUBLIC_KEY"`
+	Certificate  Certificate  `kmip:"CERTIFICATE"`
+	OpaqueObject OpaqueObject `kmip:"OPAQUE_OBJECT"`
 }
 
 // RegisterResponse is a Register Response Payload
