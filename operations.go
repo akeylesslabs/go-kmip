@@ -253,9 +253,9 @@ type ModifyAttributeResponse struct {
 }
 
 type DeleteAttributeRequest struct {
-	UniqueIdentifier string `kmip:"UNIQUE_IDENTIFIER"`
-	AttributeName    string `kmip:"ATTRIBUTE_NAME,required"`
-	AttributeIndex   *int32 `kmip:"ATTRIBUTE_INDEX"`
+	UniqueIdentifier string  `kmip:"UNIQUE_IDENTIFIER"`
+	AttributeName    string  `kmip:"ATTRIBUTE_NAME,required"`
+	AttributeIndex   []int32 `kmip:"ATTRIBUTE_INDEX"`
 }
 
 type DeleteAttributeResponse struct {

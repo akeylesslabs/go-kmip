@@ -5,6 +5,7 @@ package kmip
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import (
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -37,7 +38,11 @@ func (a *Attribute) BuildFieldValue(name string) (v interface{}, err error) {
 	case ATTRIBUTE_NAME_DIGEST:
 		v = &Digest{}
 	default:
-		err = errors.Errorf("unsupported attribute: %v", a.Name)
+		if strings.HasPrefix(a.Name, "x-") || strings.HasPrefix(a.Name, "y-") {
+			v = ""
+		} else {
+			err = errors.Errorf("unsupported attribute: %v", a.Name)
+		}
 	}
 
 	return
