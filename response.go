@@ -78,6 +78,12 @@ func (bi *ResponseBatchItem) BuildFieldValue(name string) (v interface{}, err er
 		v = &ReKeyResponse{}
 	case OPERATION_QUERY:
 		v = &QueryResponse{}
+	case OPERATION_ADD_ATTRIBUTE:
+		v = &AddAttributeResponse{}
+	case OPERATION_MODIFY_ATTRIBUTE:
+		v = &ModifyAttributeResponse{}
+	case OPERATION_DELETE_ATTRIBUTE:
+		v = &DeleteAttributeResponse{}
 	default:
 		err = errors.Errorf("unsupported operation: %v", bi.Operation)
 	}
