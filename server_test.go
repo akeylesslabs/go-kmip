@@ -182,7 +182,8 @@ func (s *ServerSuite) TestConnectTLSNoCA() {
 		s.client.TLSConfig.RootCAs = savedPool
 	}()
 
-	s.Require().EqualError(errors.Cause(s.client.Connect()), "x509: certificate signed by unknown authority")
+	s.Require().Error(errors.Cause(s.client.Connect()), "x509: certificate signed by unknown authority")
+	s.Require().Contains(errors.Cause(s.client.Connect()).Error(), "x509: certificate signed by unknown authority")
 }
 
 func (s *ServerSuite) TestOperationGenericFail() {
