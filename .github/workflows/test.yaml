@@ -37,7 +37,7 @@ jobs:
         run: go mod download
 
       - name: gofmt
-        run: .github/scripts/test/lint.sh
+        run: .github/scripts/lint.sh
 
       - name: Install golint
         run: |
