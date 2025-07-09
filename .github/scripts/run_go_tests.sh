@@ -53,9 +53,9 @@ all_tests_list=\
 
 function test_kmip() {
   echo "Testing KMIP package"
-  go test ${verbose} -failfast -race -timeout 300s ./work/go-kmip/go-kmip/... ${go_tags:+"-tags" "$go_tags"}
+  cd ./work/go-kmip/go-kmip
+  go test ${verbose} -failfast -race -timeout 300s ./... ${go_tags:+"-tags" "$go_tags"}
 }
-
 
 # ========== Start main script ============
 handle_parameters $*
