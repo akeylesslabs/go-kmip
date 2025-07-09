@@ -18,18 +18,20 @@ import (
 //
 // All core types are supported:
 //
-//  * Integer (int32)
-//  * Long Integer (int64)
-//  * Enumeration (Enum)
-//  * Boolean (bool)
-//  * Bytes ([]byte)
-//  * String (string)
-//  * Timestamp (time.Time)
-//  * Interval (time.Duration)
+//   - Integer (int32)
+//   - Long Integer (int64)
+//   - Enumeration (Enum)
+//   - Boolean (bool)
+//   - Bytes ([]byte)
+//   - String (string)
+//   - Timestamp (time.Time)
+//   - Interval (time.Duration)
 //
 // Encoder processes Go structure, analyzing field tags and parsing out
 // `kmip` Go struct tags, e.g.:
-//	  Value string `kmip:"TAG_NAME,required"`
+//
+//	Value string `kmip:"TAG_NAME,required"`
+//
 // KMIP TAG_NAME is looked up to find tag value, Go type is translated to
 // respective KMIP core type (see above), length is automatically calculated.
 //
