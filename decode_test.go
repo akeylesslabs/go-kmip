@@ -457,6 +457,28 @@ func (s *DecoderSuite) TestDecodeMessageGet() {
 	}, m)
 }
 
+func (s *DecoderSuite) TestDecodeMessageRekey() {
+	var m Request
+
+	err := NewDecoder(bytes.NewReader(messageRekey)).Decode(&m)
+	s.Assert().NoError(err)
+	s.Assert().Equal(
+		Request{
+			Header: RequestHeader{
+				Version:    ProtocolVersion{Major: 1, Minor: 1},
+				BatchCount: 1,
+			},
+			BatchItems: []RequestBatchItem{
+				{
+					Operation: OPERATION_REKEY,
+					RequestPayload: ReKeyRequest{
+						UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					},
+				},
+			},
+		}, m)
+}
+
 func TestDecoderSuite(t *testing.T) {
 	suite.Run(t, new(DecoderSuite))
 }

@@ -364,6 +364,30 @@ func (s *EncoderSuite) TestEncodeMessageGetPointer() {
 	s.Assert().EqualValues(messageGet, buf.Bytes())
 }
 
+func (s *EncoderSuite) TestEncodeMessageRekey() {
+	var buf bytes.Buffer
+
+	rekeyRequest := Request{
+		Header: RequestHeader{
+			Version:    ProtocolVersion{Major: 1, Minor: 1},
+			BatchCount: 1,
+		},
+		BatchItems: []RequestBatchItem{
+			{
+				Operation: OPERATION_REKEY,
+				RequestPayload: ReKeyRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+				},
+			},
+		},
+	}
+
+	err := NewEncoder(&buf).Encode(&rekeyRequest)
+	s.Assert().NoError(err)
+
+	s.Assert().EqualValues(messageRekey, buf.Bytes())
+}
+
 func TestEncoderSuite(t *testing.T) {
 	suite.Run(t, new(EncoderSuite))
 }
