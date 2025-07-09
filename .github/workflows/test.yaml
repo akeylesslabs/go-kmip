@@ -30,9 +30,6 @@ jobs:
           cache: false
         id: go
 
-      - name: "Granting private modules access"
-        run: .github/scripts/common/granting_private_modules_access.sh
-
       - name: download dependencies
         run: go mod download
 
@@ -58,9 +55,6 @@ jobs:
           go-version-file: go.mod
           cache: false
         id: go
-
-      - name: "Granting private modules access"
-        run: .github/scripts/common/granting_private_modules_access.sh
 
       - name: download dependencies
         run: go mod download
