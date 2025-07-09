@@ -80,6 +80,12 @@ func (bi *RequestBatchItem) BuildFieldValue(name string) (v interface{}, err err
 		v = &EncryptRequest{}
 	case OPERATION_QUERY:
 		v = &QueryRequest{}
+	case OPERATION_ADD_ATTRIBUTE:
+		v = &AddAttributeRequest{}
+	case OPERATION_MODIFY_ATTRIBUTE:
+		v = &ModifyAttributeRequest{}
+	case OPERATION_DELETE_ATTRIBUTE:
+		v = &DeleteAttributeRequest{}
 	default:
 		err = errors.Errorf("unsupported operation: %v", bi.Operation)
 	}

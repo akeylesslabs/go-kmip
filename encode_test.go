@@ -388,6 +388,87 @@ func (s *EncoderSuite) TestEncodeMessageRekey() {
 	s.Assert().EqualValues(messageRekey, buf.Bytes())
 }
 
+func (s *EncoderSuite) TestEncodeMessageAddAttribute() {
+	var buf bytes.Buffer
+
+	rekeyRequest := Request{
+		Header: RequestHeader{
+			Version:    ProtocolVersion{Major: 1, Minor: 1},
+			BatchCount: 1,
+		},
+		BatchItems: []RequestBatchItem{
+			{
+				Operation: OPERATION_ADD_ATTRIBUTE,
+				RequestPayload: AddAttributeRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					Attribute: Attribute{
+						Name:  ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+						Value: CRYPTO_AES,
+					},
+				},
+			},
+		},
+	}
+
+	err := NewEncoder(&buf).Encode(&rekeyRequest)
+	s.Assert().NoError(err)
+
+	s.Assert().EqualValues(messageAddAttribute, buf.Bytes())
+}
+
+func (s *EncoderSuite) TestEncodeMessageModifyAttribute() {
+	var buf bytes.Buffer
+
+	rekeyRequest := Request{
+		Header: RequestHeader{
+			Version:    ProtocolVersion{Major: 1, Minor: 1},
+			BatchCount: 1,
+		},
+		BatchItems: []RequestBatchItem{
+			{
+				Operation: OPERATION_MODIFY_ATTRIBUTE,
+				RequestPayload: ModifyAttributeRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					Attribute: Attribute{
+						Name:  ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+						Value: CRYPTO_AES,
+					},
+				},
+			},
+		},
+	}
+
+	err := NewEncoder(&buf).Encode(&rekeyRequest)
+	s.Assert().NoError(err)
+
+	s.Assert().EqualValues(messageModifyAttribute, buf.Bytes())
+}
+
+func (s *EncoderSuite) TestEncodeMessageDeleteAttribute() {
+	var buf bytes.Buffer
+
+	rekeyRequest := Request{
+		Header: RequestHeader{
+			Version:    ProtocolVersion{Major: 1, Minor: 1},
+			BatchCount: 1,
+		},
+		BatchItems: []RequestBatchItem{
+			{
+				Operation: OPERATION_DELETE_ATTRIBUTE,
+				RequestPayload: DeleteAttributeRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					AttributeName:    "x-customAttribute",
+				},
+			},
+		},
+	}
+
+	err := NewEncoder(&buf).Encode(&rekeyRequest)
+	s.Assert().NoError(err)
+
+	s.Assert().EqualValues(messageDeleteAttribute, buf.Bytes())
+}
+
 func TestEncoderSuite(t *testing.T) {
 	suite.Run(t, new(EncoderSuite))
 }

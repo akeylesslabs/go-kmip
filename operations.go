@@ -231,3 +231,34 @@ type ReKeyRequest struct {
 type ReKeyResponse struct {
 	UniqueIdentifier string `kmip:"UNIQUE_IDENTIFIER,required"`
 }
+
+type AddAttributeRequest struct {
+	UniqueIdentifier string    `kmip:"UNIQUE_IDENTIFIER"`
+	Attribute        Attribute `kmip:"ATTRIBUTE,required"`
+}
+
+type AddAttributeResponse struct {
+	UniqueIdentifier string    `kmip:"UNIQUE_IDENTIFIER,required"`
+	Attribute        Attribute `kmip:"ATTRIBUTE,required"`
+}
+
+type ModifyAttributeRequest struct {
+	UniqueIdentifier string    `kmip:"UNIQUE_IDENTIFIER"`
+	Attribute        Attribute `kmip:"ATTRIBUTE,required"`
+}
+
+type ModifyAttributeResponse struct {
+	UniqueIdentifier string    `kmip:"UNIQUE_IDENTIFIER,required"`
+	Attribute        Attribute `kmip:"ATTRIBUTE,required"`
+}
+
+type DeleteAttributeRequest struct {
+	UniqueIdentifier string  `kmip:"UNIQUE_IDENTIFIER"`
+	AttributeName    string  `kmip:"ATTRIBUTE_NAME,required"`
+	AttributeIndex   []int32 `kmip:"ATTRIBUTE_INDEX"`
+}
+
+type DeleteAttributeResponse struct {
+	UniqueIdentifier string    `kmip:"UNIQUE_IDENTIFIER,required"`
+	Attribute        Attribute `kmip:"ATTRIBUTE,required"`
+}
