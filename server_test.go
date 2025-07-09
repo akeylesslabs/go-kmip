@@ -166,8 +166,9 @@ func (s *ServerSuite) TestSessionAuthHandlerFail() {
 }
 
 func (s *ServerSuite) TestConnectTLSNoCert() {
-	var savedCerts []tls.Certificate
-	savedCerts, s.client.TLSConfig.Certificates = s.client.TLSConfig.Certificates, nil
+
+	savedCerts := s.client.TLSConfig.Certificates
+	s.client.TLSConfig.Certificates = nil
 	defer func() {
 		s.client.TLSConfig.Certificates = savedCerts
 	}()
