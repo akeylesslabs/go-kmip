@@ -479,6 +479,81 @@ func (s *DecoderSuite) TestDecodeMessageRekey() {
 		}, m)
 }
 
+func (s *DecoderSuite) TestDecodeMessageAddAttribute() {
+	var m Request
+
+	err := NewDecoder(bytes.NewReader(messageAddAttribute)).Decode(&m)
+	s.Assert().NoError(err)
+	s.Assert().Equal(
+		Request{
+			Header: RequestHeader{
+				Version:    ProtocolVersion{Major: 1, Minor: 1},
+				BatchCount: 1,
+			},
+			BatchItems: []RequestBatchItem{
+				{
+					Operation: OPERATION_ADD_ATTRIBUTE,
+					RequestPayload: AddAttributeRequest{
+						UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+						Attribute: Attribute{
+							Name:  ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+							Value: CRYPTO_AES,
+						},
+					},
+				},
+			},
+		}, m)
+}
+
+func (s *DecoderSuite) TestDecodeMessageModifyAttribute() {
+	var m Request
+
+	err := NewDecoder(bytes.NewReader(messageModifyAttribute)).Decode(&m)
+	s.Assert().NoError(err)
+	s.Assert().Equal(
+		Request{
+			Header: RequestHeader{
+				Version:    ProtocolVersion{Major: 1, Minor: 1},
+				BatchCount: 1,
+			},
+			BatchItems: []RequestBatchItem{
+				{
+					Operation: OPERATION_MODIFY_ATTRIBUTE,
+					RequestPayload: ModifyAttributeRequest{
+						UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+						Attribute: Attribute{
+							Name:  ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+							Value: CRYPTO_AES,
+						},
+					},
+				},
+			},
+		}, m)
+}
+
+func (s *DecoderSuite) TestDecodeMessageDeleteAttribute() {
+	var m Request
+
+	err := NewDecoder(bytes.NewReader(messageDeleteAttribute)).Decode(&m)
+	s.Assert().NoError(err)
+	s.Assert().Equal(
+		Request{
+			Header: RequestHeader{
+				Version:    ProtocolVersion{Major: 1, Minor: 1},
+				BatchCount: 1,
+			},
+			BatchItems: []RequestBatchItem{
+				{
+					Operation: OPERATION_DELETE_ATTRIBUTE,
+					RequestPayload: DeleteAttributeRequest{
+						UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+						AttributeName:    "x-customAttribute",
+					},
+				},
+			},
+		}, m)
+}
+
 func TestDecoderSuite(t *testing.T) {
 	suite.Run(t, new(DecoderSuite))
 }
