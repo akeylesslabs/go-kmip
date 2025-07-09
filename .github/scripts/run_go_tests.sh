@@ -53,6 +53,7 @@ all_tests_list=\
 
 function test_kmip() {
   echo "Testing KMIP package"
+  pwd
   go test ${verbose} -failfast -race -timeout 300s ./... ${go_tags:+"-tags" "$go_tags"}
 }
 
