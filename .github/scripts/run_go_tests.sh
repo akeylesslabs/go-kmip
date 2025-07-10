@@ -46,10 +46,7 @@ function handle_parameters() {
     done
 }
 
-all_tests_list=\
-( \
-    "kmip" \
-)
+all_tests_list=("kmip")
 
 function test_kmip() {
   echo "Testing KMIP package"
