@@ -20,7 +20,6 @@ function handle_parameters() {
     target="all"
     cleanCache=true
     go_tags=''
-    verbose="-v"
 
     until [[ -z $1 ]]; do
         case $1 in
@@ -36,7 +35,6 @@ function handle_parameters() {
             cleanCache=false
             ;;
          --no-verbose )
-            verbose=""
             ;;
         * )
             usage
@@ -55,7 +53,7 @@ function test_kmip() {
 }
 
 # ========== Start main script ============
-handle_parameters $*
+handle_parameters "$@"
 # Running inside github context
 if [[ -n "${GITHUB_CONTEXT}" ]]; then
 # For self-hosted runners
@@ -63,28 +61,27 @@ if [[ -n "${GITHUB_CONTEXT}" ]]; then
 fi
 
 currentDir=$(pwd)
-cd ${code_root}
 
 if [[ ${cleanCache} = true ]] ; then
     go clean -testcache
 fi
 
 if [[ $target == "all" ]]; then
-  for test_func in ${all_tests_list[@]}; do
+  for test_func in "${all_tests_list[@]}"; do
     cmd="test_${test_func}"
     set -euo pipefail
-    eval $cmd
+    eval "$cmd"
   done
 elif [[ "$target" =~ (kmip) ]]; then
 
 
   cmd="test_${target//-/_}"
   set -euo pipefail
-  eval $cmd
+  eval "$cmd"
 else
     echo "error: invalid target"
-    cd ${currentDir}
+    cd "${currentDir}"
     usage
 fi
 
-cd ${currentDir}
+cd "${currentDir}"
