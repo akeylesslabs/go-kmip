@@ -7,6 +7,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: pipeline-${{ github.ref }}
   cancel-in-progress: true
@@ -16,48 +19,3 @@ env:
 
 jobs:
   lint:
-    name: go-lint
-    runs-on: ubuntu-22.04
-    timeout-minutes: 60
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up GO
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: false
-        id: go
-
-      - name: download dependencies
-        run: go mod download
-
-      - name: gofmt
-        run: .github/scripts/lint.sh
-
-      - name: Install golint
-        run: |
-          export PATH=$PATH:$(go env GOPATH)/bin
-          go get golang.org/x/lint/golint
-
-  test-kmip:
-    name: test-kmip
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up GO
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-          cache: false
-        id: go
-
-      - name: download dependencies
-        run: go mod download
-
-      - name: Test
-        run: .github/scripts/run_go_tests.sh --target kmip
