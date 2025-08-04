@@ -37,6 +37,8 @@ func (a *Attribute) BuildFieldValue(name string) (v interface{}, err error) {
 		v = &Name{}
 	case ATTRIBUTE_NAME_DIGEST:
 		v = &Digest{}
+	case ATTRIBUTE_NAME_LINK:
+		v = &Link{}
 	default:
 		if strings.HasPrefix(a.Name, "x-") || strings.HasPrefix(a.Name, "y-") {
 			v = ""
@@ -85,4 +87,9 @@ type Digest struct {
 	HashingAlgorithm Enum   `kmip:"HASHING_ALGORITHM,required"`
 	DigestValue      []byte `kmip:"DIGEST_VALUE"`
 	KeyFormatType    Enum   `kmip:"KEY_FORMAT_TYPE"`
+}
+
+type Link struct {
+	Type  Enum   `kmip:"LINK_TYPE,required"`
+	Value string `kmip:"LINKED_OBJECT_IDENTIFIER,required"`
 }

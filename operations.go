@@ -225,11 +225,14 @@ type LocateResponse struct {
 	UniqueIdentifiers []string `kmip:"UNIQUE_IDENTIFIER"`
 }
 type ReKeyRequest struct {
-	UniqueIdentifier string `kmip:"UNIQUE_IDENTIFIER,required"`
+	UniqueIdentifier  string            `kmip:"UNIQUE_IDENTIFIER,required"`
+	Offset            time.Duration     `kmip:"OFFSET"`
+	TemplateAttribute TemplateAttribute `kmip:"TEMPLATE_ATTRIBUTE"`
 }
 
 type ReKeyResponse struct {
-	UniqueIdentifier string `kmip:"UNIQUE_IDENTIFIER,required"`
+	UniqueIdentifier  string            `kmip:"UNIQUE_IDENTIFIER,required"`
+	TemplateAttribute TemplateAttribute `kmip:"TEMPLATE_ATTRIBUTE"`
 }
 
 type AddAttributeRequest struct {

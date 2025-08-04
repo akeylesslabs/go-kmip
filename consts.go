@@ -1282,3 +1282,26 @@ const (
 )
 
 const OpaqueDataType_NONE Enum = 0x80000000
+
+const (
+	LinkTypeCertificateLink          Enum = 0x00000101
+	LinkTypePublicKeyLink            Enum = 0x00000102
+	LinkTypePrivateKeyLink           Enum = 0x00000103
+	LinkTypeDerivationBaseObjectLink Enum = 0x00000104
+	LinkTypeDerivedKeyLink           Enum = 0x00000105
+	LinkTypeReplacementObjectLink    Enum = 0x00000106
+	LinkTypeReplacedObjectLink       Enum = 0x00000107
+
+	// KMIP 1.2.
+	LinkTypeParentLink   Enum = 0x00000108
+	LinkTypeChildLink    Enum = 0x00000109
+	LinkTypePreviousLink Enum = 0x0000010A
+	LinkTypeNextLink     Enum = 0x0000010B
+
+	// KMPI 1.4.
+	LinkTypePKCS_12CertificateLink Enum = 0x0000010C
+	LinkTypePKCS_12PasswordLink    Enum = 0x0000010D
+
+	// KMIP 2.0+ only.
+	LinkTypeWrappingKeyLink Enum = 0x0000010E
+)
