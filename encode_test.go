@@ -377,6 +377,15 @@ func (s *EncoderSuite) TestEncodeMessageRekey() {
 				Operation: OPERATION_REKEY,
 				RequestPayload: ReKeyRequest{
 					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					Offset:           1*time.Minute + 30*time.Second,
+					TemplateAttribute: TemplateAttribute{
+						Attributes: []Attribute{
+							{
+								Name:  ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+								Value: CRYPTO_AES,
+							},
+						},
+					},
 				},
 			},
 		},
