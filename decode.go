@@ -278,6 +278,11 @@ func (d *Decoder) decodeValue(f field, t reflect.Type, ff reflect.Value) (n int,
 		sD.tag = f.tag
 		n, err = d.decode(vv, sD)
 
+		// invoke post-decode hook on this decoded struct
+		if h, ok := vv.Interface().(AfterUnmarshalKMIP); ok {
+			h.AfterUnmarshalKMIP()
+		}
+
 		v = vv.Elem().Interface()
 	default:
 		panic("unsupported type")
