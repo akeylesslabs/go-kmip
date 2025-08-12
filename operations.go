@@ -38,11 +38,11 @@ type CreateKeyPairResponse struct {
 
 // GetRequest is a Get Request Payload
 type GetRequest struct {
-	UniqueIdentifier   string                   `kmip:"UNIQUE_IDENTIFIER"`
-	KeyFormatType      Enum                     `kmip:"KEY_FORMAT_TYPE"`
-	KeyWrapType        Enum                     `kmip:"KEY_WRAP_TYPE"`
-	KeyCompressionType Enum                     `kmip:"KEY_COMPRESSION_TYPE"`
-	KeyWrappingSpec    KeyWrappingSpecification `kmip:"KEY_WRAPPING_SPECIFICATION"`
+	UniqueIdentifier         string                   `kmip:"UNIQUE_IDENTIFIER"`
+	KeyFormatType            Enum                     `kmip:"KEY_FORMAT_TYPE"`
+	KeyWrapType              Enum                     `kmip:"KEY_WRAP_TYPE"`
+	KeyCompressionType       Enum                     `kmip:"KEY_COMPRESSION_TYPE"`
+	KeyWrappingSpecification KeyWrappingSpecification `kmip:"KEY_WRAPPING_SPECIFICATION"`
 }
 
 // GetResponse is a Get Response Payload
