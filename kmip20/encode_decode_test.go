@@ -196,4 +196,3 @@ func TestKMIP20_EncodeDecode_SetAttribute_Request(t *testing.T) {
 	require.Equal(t, "uid", sar.UniqueIdentifier)
 	require.Equal(t, kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM, sar.NewAttribute.Name)
 }
-
