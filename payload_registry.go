@@ -26,6 +26,10 @@ func RegisterRequestPayloadFactory(version ProtocolVersion, operation Enum, fact
 	payloadFactoriesMu.Lock()
 	defer payloadFactoriesMu.Unlock()
 
+	if factory == nil {
+		panic(errors.Errorf("nil PayloadFactory for version=%v operation=%v", version, operation))
+	}
+
 	requestPayloadFactories[payloadFactoryKey{version: version, operation: operation}] = factory
 }
 
@@ -34,6 +38,10 @@ func RegisterRequestPayloadFactory(version ProtocolVersion, operation Enum, fact
 func RegisterResponsePayloadFactory(version ProtocolVersion, operation Enum, factory PayloadFactory) {
 	payloadFactoriesMu.Lock()
 	defer payloadFactoriesMu.Unlock()
+
+	if factory == nil {
+		panic(errors.Errorf("nil PayloadFactory for version=%v operation=%v", version, operation))
+	}
 
 	responsePayloadFactories[payloadFactoryKey{version: version, operation: operation}] = factory
 }
@@ -45,7 +53,11 @@ func NewRequestPayload(version ProtocolVersion, operation Enum) (interface{}, er
 	payloadFactoriesMu.RLock()
 	if factory, ok := requestPayloadFactories[payloadFactoryKey{version: version, operation: operation}]; ok {
 		payloadFactoriesMu.RUnlock()
-		return factory(), nil
+		v := factory()
+		if v == nil {
+			return nil, errors.Errorf("request payload factory returned nil for version=%v operation=%v", version, operation)
+		}
+		return v, nil
 	}
 	payloadFactoriesMu.RUnlock()
 
@@ -98,7 +110,11 @@ func NewResponsePayload(version ProtocolVersion, operation Enum) (interface{}, e
 	payloadFactoriesMu.RLock()
 	if factory, ok := responsePayloadFactories[payloadFactoryKey{version: version, operation: operation}]; ok {
 		payloadFactoriesMu.RUnlock()
-		return factory(), nil
+		v := factory()
+		if v == nil {
+			return nil, errors.Errorf("response payload factory returned nil for version=%v operation=%v", version, operation)
+		}
+		return v, nil
 	}
 	payloadFactoriesMu.RUnlock()
 
