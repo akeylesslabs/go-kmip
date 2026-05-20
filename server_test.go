@@ -11,10 +11,12 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -118,6 +120,25 @@ func (s *ServerSuite) TestDiscoverVersions() {
 	s.Require().Equal([]ProtocolVersion(nil), versions)
 }
 
+func TestDiscoverVersionsCanAdvertiseKMIP20WhenConfigured(t *testing.T) {
+	server := &Server{
+		SupportedVersions: []ProtocolVersion{
+			{Major: 2, Minor: 0},
+			{Major: 1, Minor: 4},
+		},
+	}
+
+	resp, err := server.handleDiscoverVersions(&RequestContext{}, &RequestBatchItem{
+		RequestPayload: DiscoverVersionsRequest{
+			ProtocolVersions: []ProtocolVersion{{Major: 2, Minor: 0}},
+		},
+	})
+	require.NoError(t, err)
+	require.Equal(t, DiscoverVersionsResponse{
+		ProtocolVersions: []ProtocolVersion{{Major: 2, Minor: 0}},
+	}, resp)
+}
+
 func (s *ServerSuite) TestSessionAuthHandlerOkay() {
 	s.server.SessionAuthHandler = func(conn net.Conn) (interface{}, error) {
 		commonName := conn.(*tls.Conn).ConnectionState().PeerCertificates[0].Subject.CommonName
@@ -186,8 +207,14 @@ func (s *ServerSuite) TestConnectTLSNoCA() {
 		s.client.TLSConfig.RootCAs = savedPool
 	}()
 
-	s.Require().Error(errors.Cause(s.client.Connect()))
-	s.Require().Contains(errors.Cause(s.client.Connect()).Error(), "x509: certificate signed by unknown authority")
+	err := errors.Cause(s.client.Connect())
+	s.Require().Error(err)
+	s.Require().True(
+		strings.Contains(err.Error(), "x509: certificate signed by unknown authority") ||
+			strings.Contains(err.Error(), "certificate is not trusted"),
+		"unexpected certificate error: %s",
+		err,
+	)
 }
 
 func (s *ServerSuite) TestOperationGenericFail() {

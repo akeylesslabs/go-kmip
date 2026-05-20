@@ -4,11 +4,7 @@ package kmip
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import (
-	"time"
-
-	"github.com/pkg/errors"
-)
+import "time"
 
 // Request is a Request Message Structure
 type Request struct {
@@ -45,52 +41,13 @@ type RequestBatchItem struct {
 	UniqueID         []byte           `kmip:"UNIQUE_BATCH_ITEM_ID"`
 	RequestPayload   interface{}      `kmip:"REQUEST_PAYLOAD,required"`
 	MessageExtension MessageExtension `kmip:"MESSAGE_EXTENSION"`
+
+	protocolVersion ProtocolVersion
 }
 
 // BuildFieldValue builds value for RequestPayload based on Operation
 func (bi *RequestBatchItem) BuildFieldValue(name string) (v interface{}, err error) {
-	switch bi.Operation {
-	case OPERATION_CREATE:
-		v = &CreateRequest{}
-	case OPERATION_CREATE_KEY_PAIR:
-		v = &CreateKeyPairRequest{}
-	case OPERATION_GET:
-		v = &GetRequest{}
-	case OPERATION_GET_ATTRIBUTES:
-		v = &GetAttributesRequest{}
-	case OPERATION_GET_ATTRIBUTE_LIST:
-		v = &GetAttributeListRequest{}
-	case OPERATION_DESTROY:
-		v = &DestroyRequest{}
-	case OPERATION_DISCOVER_VERSIONS:
-		v = &DiscoverVersionsRequest{}
-	case OPERATION_REGISTER:
-		v = &RegisterRequest{}
-	case OPERATION_ACTIVATE:
-		v = &ActivateRequest{}
-	case OPERATION_LOCATE:
-		v = &LocateRequest{}
-	case OPERATION_REVOKE:
-		v = &RevokeRequest{}
-	case OPERATION_REKEY:
-		v = &ReKeyRequest{}
-	case OPERATION_DECRYPT:
-		v = &DecryptRequest{}
-	case OPERATION_ENCRYPT:
-		v = &EncryptRequest{}
-	case OPERATION_QUERY:
-		v = &QueryRequest{}
-	case OPERATION_ADD_ATTRIBUTE:
-		v = &AddAttributeRequest{}
-	case OPERATION_MODIFY_ATTRIBUTE:
-		v = &ModifyAttributeRequest{}
-	case OPERATION_DELETE_ATTRIBUTE:
-		v = &DeleteAttributeRequest{}
-	default:
-		err = errors.Errorf("unsupported operation: %v", bi.Operation)
-	}
-
-	return
+	return NewRequestPayload(bi.protocolVersion, bi.Operation)
 }
 
 // ProtocolVersion is a Protocol Version structure
