@@ -196,3 +196,197 @@ func TestKMIP20_EncodeDecode_SetAttribute_Request(t *testing.T) {
 	require.Equal(t, "uid", sar.UniqueIdentifier)
 	require.Equal(t, kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM, sar.NewAttribute.Name)
 }
+
+func TestKMIP20_EncodeDecode_Get_Request(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_GET,
+				RequestPayload: kmip.GetRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, kmip.GetRequest{}, decoded.BatchItems[0].RequestPayload)
+}
+
+func TestKMIP20_EncodeDecode_ReKey_Request(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_REKEY,
+				RequestPayload: kmip.ReKeyRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, kmip.ReKeyRequest{}, decoded.BatchItems[0].RequestPayload)
+}
+
+func TestKMIP20_EncodeDecode_AddAttribute_Request(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_ADD_ATTRIBUTE,
+				RequestPayload: kmip.AddAttributeRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					Attribute: kmip.Attribute{
+						Name:  kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+						Value: kmip.CRYPTO_AES,
+					},
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, kmip.AddAttributeRequest{}, decoded.BatchItems[0].RequestPayload)
+}
+
+func TestKMIP20_EncodeDecode_ModifyAttribute_Request(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_MODIFY_ATTRIBUTE,
+				RequestPayload: kmip.ModifyAttributeRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					Attribute: kmip.Attribute{
+						Name:  kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+						Value: kmip.CRYPTO_AES,
+					},
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, kmip.ModifyAttributeRequest{}, decoded.BatchItems[0].RequestPayload)
+}
+
+func TestKMIP20_EncodeDecode_DeleteAttribute_Request(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_DELETE_ATTRIBUTE,
+				RequestPayload: kmip.DeleteAttributeRequest{
+					UniqueIdentifier: "49a1ca88-6bea-4fb2-b450-7e58802c3038",
+					AttributeName:    "x-customAttribute",
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, kmip.DeleteAttributeRequest{}, decoded.BatchItems[0].RequestPayload)
+}
+
+func TestKMIP20_EncodeDecode_AdjustAttribute_Request(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_ADJUST_ATTRIBUTE,
+				RequestPayload: AdjustAttributeRequest{
+					UniqueIdentifier: "uid",
+					AttributeRef: AttributeReference{
+						Name:  kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_LENGTH,
+						Index: 0,
+					},
+					AdjustmentType:  kmip.Enum(1),
+					AdjustmentValue: 32,
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, AdjustAttributeRequest{}, decoded.BatchItems[0].RequestPayload)
+	ar := decoded.BatchItems[0].RequestPayload.(AdjustAttributeRequest)
+	require.Equal(t, "uid", ar.UniqueIdentifier)
+	require.Equal(t, kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_LENGTH, ar.AttributeRef.Name)
+}
+
+func TestKMIP20_EncodeDecode_AdjustAttribute_Response(t *testing.T) {
+	resp := kmip.Response{
+		Header: kmip.ResponseHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.ResponseBatchItem{
+			{
+				Operation:       kmip.OPERATION_ADJUST_ATTRIBUTE,
+				ResultStatus:    kmip.RESULT_STATUS_SUCCESS,
+				ResponsePayload: AdjustAttributeResponse{UniqueIdentifier: "uid"},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(resp))
+
+	var decoded kmip.Response
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, AdjustAttributeResponse{}, decoded.BatchItems[0].ResponsePayload)
+	ar := decoded.BatchItems[0].ResponsePayload.(AdjustAttributeResponse)
+	require.Equal(t, "uid", ar.UniqueIdentifier)
+}

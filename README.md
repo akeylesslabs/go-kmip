@@ -46,9 +46,15 @@ import (
 - Currently covered KMIP 2.0 operations:
   - Create
   - CreateKeyPair
+  - Get
   - Register
   - Locate
   - SetAttribute
+  - AdjustAttribute
+  - ReKey
+  - AddAttribute
+  - ModifyAttribute
+  - DeleteAttribute
 
 - Notable 2.0 payload differences:
   - Uses the `ATTRIBUTES` structure (container of `ATTRIBUTE` items) instead of 1.x `TEMPLATE_ATTRIBUTE`.
@@ -57,6 +63,7 @@ import (
 - Backward compatibility:
   - 1.x payloads remain the default; registering 2.0 payloads does not replace 1.4 payloads.
   - Decoding/encoding chooses payloads based on the `ProtocolVersion` in the KMIP header.
+  - For some operations (e.g., Get, ReKey, Add/Modify/Delete Attribute), KMIP 2.0 reuses the 1.x payload structures; `kmip20` registers factories to select those under 2.0.
 
 Minimal example (KMIP 2.0 Create)
 ---------------------------------

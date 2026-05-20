@@ -17,11 +17,32 @@ func registerRequestPayloads() {
 	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_CREATE_KEY_PAIR, func() interface{} {
 		return &CreateKeyPairRequest{}
 	})
+	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_GET, func() interface{} {
+		// KMIP 2.0 Get payload is compatible with 1.x structure
+		return &kmip.GetRequest{}
+	})
 	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_REGISTER, func() interface{} {
 		return &RegisterRequest{}
 	})
 	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_LOCATE, func() interface{} {
 		return &LocateRequest{}
+	})
+	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_REKEY, func() interface{} {
+		// KMIP 2.0 ReKey payload remains compatible with 1.x structure
+		return &kmip.ReKeyRequest{}
+	})
+	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_ADD_ATTRIBUTE, func() interface{} {
+		// Though KMIP 2.0 introduces SetAttribute/AdjustAttribute, AddAttribute can still be handled
+		return &kmip.AddAttributeRequest{}
+	})
+	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_MODIFY_ATTRIBUTE, func() interface{} {
+		return &kmip.ModifyAttributeRequest{}
+	})
+	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_DELETE_ATTRIBUTE, func() interface{} {
+		return &kmip.DeleteAttributeRequest{}
+	})
+	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_ADJUST_ATTRIBUTE, func() interface{} {
+		return &AdjustAttributeRequest{}
 	})
 	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_SET_ATTRIBUTE, func() interface{} {
 		return &SetAttributeRequest{}
@@ -35,11 +56,29 @@ func registerResponsePayloads() {
 	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_CREATE_KEY_PAIR, func() interface{} {
 		return &CreateKeyPairResponse{}
 	})
+	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_GET, func() interface{} {
+		return &kmip.GetResponse{}
+	})
 	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_REGISTER, func() interface{} {
 		return &RegisterResponse{}
 	})
 	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_LOCATE, func() interface{} {
 		return &LocateResponse{}
+	})
+	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_REKEY, func() interface{} {
+		return &kmip.ReKeyResponse{}
+	})
+	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_ADD_ATTRIBUTE, func() interface{} {
+		return &kmip.AddAttributeResponse{}
+	})
+	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_MODIFY_ATTRIBUTE, func() interface{} {
+		return &kmip.ModifyAttributeResponse{}
+	})
+	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_DELETE_ATTRIBUTE, func() interface{} {
+		return &kmip.DeleteAttributeResponse{}
+	})
+	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_ADJUST_ATTRIBUTE, func() interface{} {
+		return &AdjustAttributeResponse{}
 	})
 	kmip.RegisterResponsePayloadFactory(ProtocolVersion, kmip.OPERATION_SET_ATTRIBUTE, func() interface{} {
 		return &SetAttributeResponse{}
@@ -122,5 +161,28 @@ type SetAttributeRequest struct {
 
 // SetAttributeResponse is the KMIP 2.0 Set Attribute response payload.
 type SetAttributeResponse struct {
+	UniqueIdentifier string `kmip:"UNIQUE_IDENTIFIER,required"`
+}
+
+// AttributeReference is the KMIP 2.0 Attribute Reference structure.
+type AttributeReference struct {
+	kmip.Tag `kmip:"ATTRIBUTE_REFERENCE"`
+
+	Name  string `kmip:"ATTRIBUTE_NAME,required"`
+	Index int32  `kmip:"ATTRIBUTE_INDEX"`
+}
+
+// AdjustAttributeRequest is the KMIP 2.0 Adjust Attribute request payload.
+type AdjustAttributeRequest struct {
+	UniqueIdentifier  string             `kmip:"UNIQUE_IDENTIFIER"`
+	AttributeRef      AttributeReference `kmip:"ATTRIBUTE_REFERENCE,required"`
+	AdjustmentType    kmip.Enum          `kmip:"ADJUSTMENT_TYPE,required"`
+	AdjustmentValue   int32              `kmip:"ADJUSTMENT_VALUE"`
+	CurrentAttribute  kmip.Attribute     `kmip:"CURRENT_ATTRIBUTE"`
+	NewAttribute      kmip.Attribute     `kmip:"NEW_ATTRIBUTE"`
+}
+
+// AdjustAttributeResponse is the KMIP 2.0 Adjust Attribute response payload.
+type AdjustAttributeResponse struct {
 	UniqueIdentifier string `kmip:"UNIQUE_IDENTIFIER,required"`
 }
