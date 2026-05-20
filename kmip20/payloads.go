@@ -174,12 +174,12 @@ type AttributeReference struct {
 
 // AdjustAttributeRequest is the KMIP 2.0 Adjust Attribute request payload.
 type AdjustAttributeRequest struct {
-	UniqueIdentifier  string             `kmip:"UNIQUE_IDENTIFIER"`
-	AttributeRef      AttributeReference `kmip:"ATTRIBUTE_REFERENCE,required"`
-	AdjustmentType    kmip.Enum          `kmip:"ADJUSTMENT_TYPE,required"`
-	AdjustmentValue   int32              `kmip:"ADJUSTMENT_VALUE"`
-	CurrentAttribute  kmip.Attribute     `kmip:"CURRENT_ATTRIBUTE"`
-	NewAttribute      kmip.Attribute     `kmip:"NEW_ATTRIBUTE"`
+	UniqueIdentifier string             `kmip:"UNIQUE_IDENTIFIER"`
+	AttributeRef     AttributeReference `kmip:"ATTRIBUTE_REFERENCE,required"`
+	AdjustmentType   kmip.Enum          `kmip:"ADJUSTMENT_TYPE,required"`
+	AdjustmentValue  int32              `kmip:"ADJUSTMENT_VALUE"`
+	CurrentAttribute kmip.Attribute     `kmip:"CURRENT_ATTRIBUTE"`
+	NewAttribute     kmip.Attribute     `kmip:"NEW_ATTRIBUTE"`
 }
 
 // AdjustAttributeResponse is the KMIP 2.0 Adjust Attribute response payload.
