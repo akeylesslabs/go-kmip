@@ -22,7 +22,8 @@ type Decoder struct {
 	r io.Reader
 	s io.ByteScanner
 
-	lastTag Tag
+	lastTag         Tag
+	protocolVersion ProtocolVersion
 }
 
 // NewDecoder builds Decoder which reads from r
@@ -261,6 +262,13 @@ func (d *Decoder) decodeValue(f field, t reflect.Type, ff reflect.Value) (n int,
 				return d.decodeValue(f, t, ff)
 			}
 
+			if batchItem, ok := vv.Interface().(*RequestBatchItem); ok {
+				batchItem.protocolVersion = d.protocolVersion
+			}
+			if batchItem, ok := vv.Interface().(*ResponseBatchItem); ok {
+				batchItem.protocolVersion = d.protocolVersion
+			}
+
 			sD, err = getStructDesc(vv.Type().Elem())
 			if err != nil {
 				return
@@ -273,6 +281,12 @@ func (d *Decoder) decodeValue(f field, t reflect.Type, ff reflect.Value) (n int,
 			}
 
 			vv = reflect.New(t)
+			if batchItem, ok := vv.Interface().(*RequestBatchItem); ok {
+				batchItem.protocolVersion = d.protocolVersion
+			}
+			if batchItem, ok := vv.Interface().(*ResponseBatchItem); ok {
+				batchItem.protocolVersion = d.protocolVersion
+			}
 		}
 
 		sD.tag = f.tag
@@ -281,6 +295,13 @@ func (d *Decoder) decodeValue(f field, t reflect.Type, ff reflect.Value) (n int,
 		// invoke post-decode hook on this decoded struct
 		if h, ok := vv.Interface().(AfterUnmarshalKMIP); ok {
 			h.AfterUnmarshalKMIP()
+		}
+
+		if batchItem, ok := vv.Interface().(*RequestBatchItem); ok {
+			batchItem.protocolVersion = ProtocolVersion{}
+		}
+		if batchItem, ok := vv.Interface().(*ResponseBatchItem); ok {
+			batchItem.protocolVersion = ProtocolVersion{}
 		}
 
 		v = vv.Elem().Interface()
@@ -315,6 +336,7 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 
 	// initialize wrapped decoder with limited reader
 	dd := NewDecoder(io.LimitReader(d.r, int64(expectedLen)))
+	dd.protocolVersion = d.protocolVersion
 
 	for _, f := range structD.fields {
 		var tag Tag
@@ -383,6 +405,13 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 
 			if !f.skip {
 				ff.Set(reflect.ValueOf(v))
+			}
+
+			if h, ok := v.(RequestHeader); ok {
+				dd.protocolVersion = h.Version
+			}
+			if h, ok := v.(ResponseHeader); ok {
+				dd.protocolVersion = h.Version
 			}
 		}
 	}
