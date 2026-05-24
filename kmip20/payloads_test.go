@@ -73,3 +73,39 @@ func TestDecodeResponseUsesKMIP20PayloadForKMIP20Version(t *testing.T) {
 	require.Len(t, decoded.BatchItems, 1)
 	require.IsType(t, CreateResponse{}, decoded.BatchItems[0].ResponsePayload)
 }
+
+func TestAttributes_EncodeDecode(t *testing.T) {
+	attrs := Attributes{
+		Values: kmip.Attributes{
+			{
+				Name: kmip.ATTRIBUTE_NAME_NAME,
+				Value: kmip.Name{
+					Value: "obj",
+					Type:  kmip.NAME_TYPE_UNINTERPRETED_TEXT_STRING,
+				},
+			},
+			{
+				Name:  kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM,
+				Value: kmip.CRYPTO_AES,
+			},
+			{
+				Name:  kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_LENGTH,
+				Value: int32(256),
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(attrs))
+
+	var decoded Attributes
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+
+	require.Len(t, decoded.Values, 3)
+	require.Equal(t, kmip.ATTRIBUTE_NAME_NAME, decoded.Values[0].Name)
+	require.IsType(t, kmip.Name{}, decoded.Values[0].Value)
+	require.Equal(t, kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM, decoded.Values[1].Name)
+	require.Equal(t, kmip.CRYPTO_AES, decoded.Values[1].Value)
+	require.Equal(t, kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_LENGTH, decoded.Values[2].Name)
+	require.Equal(t, int32(256), decoded.Values[2].Value)
+}
