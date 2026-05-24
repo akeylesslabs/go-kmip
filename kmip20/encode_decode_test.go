@@ -390,3 +390,108 @@ func TestKMIP20_EncodeDecode_AdjustAttribute_Response(t *testing.T) {
 	ar := decoded.BatchItems[0].ResponsePayload.(AdjustAttributeResponse)
 	require.Equal(t, "uid", ar.UniqueIdentifier)
 }
+
+func TestKMIP20_EncodeDecode_Request_MultipleBatchItems(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 2,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_CREATE,
+				RequestPayload: CreateRequest{
+					ObjectType: kmip.OBJECT_TYPE_SYMMETRIC_KEY,
+					Attributes: Attributes{
+						Values: kmip.Attributes{
+							{Name: kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM, Value: kmip.CRYPTO_AES},
+							{Name: kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_LENGTH, Value: int32(256)},
+						},
+					},
+				},
+			},
+			{
+				Operation: kmip.OPERATION_SET_ATTRIBUTE,
+				RequestPayload: SetAttributeRequest{
+					UniqueIdentifier: "uid",
+					NewAttribute: kmip.Attribute{
+						Name:  kmip.ATTRIBUTE_NAME_NAME,
+						Value: kmip.Name{Value: "n", Type: kmip.NAME_TYPE_UNINTERPRETED_TEXT_STRING},
+					},
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 2)
+	require.IsType(t, CreateRequest{}, decoded.BatchItems[0].RequestPayload)
+	require.IsType(t, SetAttributeRequest{}, decoded.BatchItems[1].RequestPayload)
+}
+
+func TestKMIP20_EncodeDecode_Response_MultipleBatchItems(t *testing.T) {
+	resp := kmip.Response{
+		Header: kmip.ResponseHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 2,
+		},
+		BatchItems: []kmip.ResponseBatchItem{
+			{
+				Operation:       kmip.OPERATION_CREATE,
+				ResultStatus:    kmip.RESULT_STATUS_SUCCESS,
+				ResponsePayload: CreateResponse{ObjectType: kmip.OBJECT_TYPE_SYMMETRIC_KEY, UniqueIdentifier: "id1"},
+			},
+			{
+				Operation:       kmip.OPERATION_SET_ATTRIBUTE,
+				ResultStatus:    kmip.RESULT_STATUS_SUCCESS,
+				ResponsePayload: SetAttributeResponse{UniqueIdentifier: "id2"},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(resp))
+
+	var decoded kmip.Response
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 2)
+	require.IsType(t, CreateResponse{}, decoded.BatchItems[0].ResponsePayload)
+	require.IsType(t, SetAttributeResponse{}, decoded.BatchItems[1].ResponsePayload)
+}
+
+func TestKMIP14_EncodeDecode_UsesV1Payloads_WithKMIP20Registered(t *testing.T) {
+	// Ensure kmip20 is imported and factories are registered
+	_ = ProtocolVersion
+
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    kmip.ProtocolVersion{Major: 1, Minor: 4},
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_CREATE,
+				RequestPayload: kmip.CreateRequest{
+					ObjectType: kmip.OBJECT_TYPE_SYMMETRIC_KEY,
+					TemplateAttribute: kmip.TemplateAttribute{
+						Attributes: kmip.Attributes{
+							{Name: kmip.ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM, Value: kmip.CRYPTO_AES},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, kmip.CreateRequest{}, decoded.BatchItems[0].RequestPayload)
+}
