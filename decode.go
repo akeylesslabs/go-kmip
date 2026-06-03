@@ -304,13 +304,6 @@ func (d *Decoder) decodeValue(f field, t reflect.Type, ff reflect.Value) (n int,
 		sD.tag = f.tag
 		n, err = d.decode(vv, sD)
 
-		// invoke post-decode hook on this decoded struct
-		if _, ok := vv.Interface().(AfterUnmarshalKMIPWithSeenFields); !ok {
-			if h, ok := vv.Interface().(AfterUnmarshalKMIP); ok {
-				h.AfterUnmarshalKMIP()
-			}
-		}
-
 		if batchItem, ok := vv.Interface().(*RequestBatchItem); ok {
 			batchItem.protocolVersion = ProtocolVersion{}
 		}
@@ -485,12 +478,15 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 	}
 
 	if rv.CanAddr() {
+		seenFields := make(map[string]bool, len(structD.fields))
+		for i, f := range structD.fields {
+			seenFields[f.name] = seen[i]
+		}
 		if h, ok := rv.Addr().Interface().(AfterUnmarshalKMIPWithSeenFields); ok {
-			seenFields := make(map[string]bool, len(structD.fields))
-			for i, f := range structD.fields {
-				seenFields[f.name] = seen[i]
-			}
 			h.AfterUnmarshalKMIPWithSeenFields(seenFields)
+		} else if h, ok := rv.Addr().Interface().(AfterUnmarshalKMIP); ok {
+			// Fallback to legacy hook to mirror decodeValue() behavior
+			h.AfterUnmarshalKMIP()
 		}
 	}
 
