@@ -31,4 +31,3 @@ func TestTopLevelLegacyHookFallback(t *testing.T) {
 	require.True(t, decoded.called, "expected legacy AfterUnmarshalKMIP to be invoked at top-level")
 	require.Equal(t, int32(123), decoded.A)
 }
-
