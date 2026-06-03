@@ -108,6 +108,9 @@ func getStructDesc(tt reflect.Type) (*structDesc, error) {
 			f.sliceof = true
 			ft = ft.Elem()
 		}
+		if ft.Kind() == reflect.Ptr {
+			ft = ft.Elem()
+		}
 
 		if err := guessType(ft, &f); err != nil {
 			return nil, errors.WithMessagef(err, "error processing field %v", ff.Name)

@@ -72,5 +72,5 @@ type RevocationReason struct {
 	Tag `kmip:"REVOCATION_REASON"`
 
 	RevocationReasonCode Enum   `kmip:"REVOCATION_REASON_CODE"`
-	RevocationMessage    string `kmip:"REVOCATION_REASON"`
+	RevocationMessage    string `kmip:"REVOCATION_MESSAGE"`
 }

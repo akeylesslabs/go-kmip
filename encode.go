@@ -112,6 +112,10 @@ func (e *Encoder) encodeValue(f field, rt reflect.Type, rv reflect.Value) (err e
 			f.typ = INTERVAL
 		}
 	}
+	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+		rt = rv.Type()
+	}
 
 	switch f.typ {
 	case INTEGER:

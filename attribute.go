@@ -18,6 +18,17 @@ type Attribute struct {
 	Name  string      `kmip:"ATTRIBUTE_NAME"`
 	Index int32       `kmip:"ATTRIBUTE_INDEX"`
 	Value interface{} `kmip:"ATTRIBUTE_VALUE"`
+
+	NameValue              Name  `kmip:"NAME"`
+	ObjectType             Enum  `kmip:"OBJECT_TYPE"`
+	CryptographicAlgorithm Enum  `kmip:"CRYPTOGRAPHIC_ALGORITHM"`
+	CryptographicLength    int32 `kmip:"CRYPTOGRAPHIC_LENGTH"`
+	CryptographicUsageMask int32 `kmip:"CRYPTOGRAPHIC_USAGE_MASK"`
+	Sensitive              bool  `kmip:"SENSITIVE"`
+	AlwaysSensitive        bool  `kmip:"ALWAYS_SENSITIVE"`
+	Extractable            bool  `kmip:"EXTRACTABLE"`
+	NeverExtractable       bool  `kmip:"NEVER_EXTRACTABLE"`
+	ReplaceExisting        bool  `kmip:"REPLACE_EXISTING"`
 }
 
 // BuildFieldValue builds dynamic Value field
@@ -31,6 +42,8 @@ func (a *Attribute) BuildFieldValue(name string) (v interface{}, err error) {
 		v = ""
 	case ATTRIBUTE_NAME_OBJECT_TYPE, ATTRIBUTE_NAME_STATE:
 		v = Enum(0)
+	case ATTRIBUTE_NAME_SENSITIVE, ATTRIBUTE_NAME_ALWAYS_SENSITIVE, ATTRIBUTE_NAME_EXTRACTABLE, ATTRIBUTE_NAME_NEVER_EXTRACTABLE, ATTRIBUTE_NAME_REPLACE_EXISTING:
+		v = false
 	case ATTRIBUTE_NAME_INITIAL_DATE, ATTRIBUTE_NAME_LAST_CHANGE_DATE, ATTRIBUTE_NAME_ACTIVATION_DATE, ATTRIBUTE_NAME_DEACTIVATION_DATE:
 		v = time.Time{}
 	case ATTRIBUTE_NAME_NAME:
@@ -48,6 +61,61 @@ func (a *Attribute) BuildFieldValue(name string) (v interface{}, err error) {
 	}
 
 	return
+}
+
+func (a *Attribute) AfterUnmarshalKMIP() {
+	if a.Name != "" {
+		return
+	}
+	if a.NameValue.Value != "" {
+		a.Name = ATTRIBUTE_NAME_NAME
+		a.Value = a.NameValue
+		return
+	}
+	if a.ObjectType != 0 {
+		a.Name = ATTRIBUTE_NAME_OBJECT_TYPE
+		a.Value = a.ObjectType
+		return
+	}
+	if a.CryptographicAlgorithm != 0 {
+		a.Name = ATTRIBUTE_NAME_CRYPTOGRAPHIC_ALGORITHM
+		a.Value = a.CryptographicAlgorithm
+		return
+	}
+	if a.CryptographicLength != 0 {
+		a.Name = ATTRIBUTE_NAME_CRYPTOGRAPHIC_LENGTH
+		a.Value = a.CryptographicLength
+		return
+	}
+	if a.CryptographicUsageMask != 0 {
+		a.Name = ATTRIBUTE_NAME_CRYPTOGRAPHIC_USAGE_MASK
+		a.Value = a.CryptographicUsageMask
+		return
+	}
+	if a.Sensitive {
+		a.Name = ATTRIBUTE_NAME_SENSITIVE
+		a.Value = a.Sensitive
+		return
+	}
+	if a.AlwaysSensitive {
+		a.Name = ATTRIBUTE_NAME_ALWAYS_SENSITIVE
+		a.Value = a.AlwaysSensitive
+		return
+	}
+	if a.Extractable {
+		a.Name = ATTRIBUTE_NAME_EXTRACTABLE
+		a.Value = a.Extractable
+		return
+	}
+	if a.NeverExtractable {
+		a.Name = ATTRIBUTE_NAME_NEVER_EXTRACTABLE
+		a.Value = a.NeverExtractable
+		return
+	}
+	if a.ReplaceExisting {
+		a.Name = ATTRIBUTE_NAME_REPLACE_EXISTING
+		a.Value = a.ReplaceExisting
+	}
 }
 
 // Attributes is a sequence of Attribute objects which allows building and search
