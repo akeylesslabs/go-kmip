@@ -371,6 +371,9 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 		fallbackFieldIdx := -1
 		for i, f := range structD.fields {
 			if f.tag == tag {
+				// Prefer an exact tag+type match. Keep the first tag-only match as
+				// a fallback for dynamic fields whose concrete TTLV type is chosen
+				// by BuildFieldValue at decode time.
 				if fallbackFieldIdx == -1 {
 					fallbackFieldIdx = i
 				}
@@ -381,6 +384,8 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 			}
 		}
 		if fieldIdx == -1 {
+			// No static type matched; decode through the tag-only field and let
+			// decodeValue resolve dynamic interface fields.
 			fieldIdx = fallbackFieldIdx
 		}
 		if fieldIdx == -1 {

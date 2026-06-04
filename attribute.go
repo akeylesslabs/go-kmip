@@ -19,6 +19,7 @@ type Attribute struct {
 	Index int32       `kmip:"ATTRIBUTE_INDEX"`
 	Value interface{} `kmip:"ATTRIBUTE_VALUE"`
 
+	// KMIP 2.0 attributes
 	NameValue              Name  `kmip:"NAME"`
 	ObjectType             Enum  `kmip:"OBJECT_TYPE"`
 	CryptographicAlgorithm Enum  `kmip:"CRYPTOGRAPHIC_ALGORITHM"`

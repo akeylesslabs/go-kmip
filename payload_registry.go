@@ -1,7 +1,6 @@
 package kmip
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -55,7 +54,6 @@ func NewRequestPayload(version ProtocolVersion, operation Enum) (interface{}, er
 	if factory, ok := requestPayloadFactories[payloadFactoryKey{version: version, operation: operation}]; ok {
 		payloadFactoriesMu.RUnlock()
 		v := factory()
-		fmt.Printf("KMIP payload factory: version=%+v operation=%d type=%T nil=%v\n", version, operation, v, v == nil)
 		if v == nil {
 			return nil, errors.Errorf("request payload factory returned nil for version=%v operation=%v", version, operation)
 		}
@@ -113,7 +111,6 @@ func NewResponsePayload(version ProtocolVersion, operation Enum) (interface{}, e
 	if factory, ok := responsePayloadFactories[payloadFactoryKey{version: version, operation: operation}]; ok {
 		payloadFactoriesMu.RUnlock()
 		v := factory()
-		fmt.Printf("KMIP response payload factory: version=%+v operation=%d type=%T nil=%v\n", version, operation, v, v == nil)
 		if v == nil {
 			return nil, errors.Errorf("response payload factory returned nil for version=%v operation=%v", version, operation)
 		}

@@ -129,8 +129,11 @@ func registerResponsePayloads() {
 type Attributes struct {
 	kmip.Tag `kmip:"ATTRIBUTES"`
 
+	// Values is the canonical in-memory representation. The fields below model
+	// the different KMIP 2.0 wire shapes and are normalized into Values.
 	Values kmip.Attributes `kmip:"ATTRIBUTE"`
 
+	// Direct KMIP 2.0 attribute tags.
 	Name                   kmip.Name `kmip:"NAME"`
 	ObjectType             kmip.Enum `kmip:"OBJECT_TYPE"`
 	CryptographicAlgorithm kmip.Enum `kmip:"CRYPTOGRAPHIC_ALGORITHM"`
@@ -142,10 +145,12 @@ type Attributes struct {
 	NeverExtractable       bool      `kmip:"NEVER_EXTRACTABLE"`
 	ReplaceExisting        bool      `kmip:"REPLACE_EXISTING"`
 
+	// Legacy attribute-name/value wrapper.
 	AttributeName  string      `kmip:"ATTRIBUTE_NAME"`
 	AttributeIndex int32       `kmip:"ATTRIBUTE_INDEX"`
 	AttributeValue interface{} `kmip:"ATTRIBUTE_VALUE"`
 
+	// Attribute-management operations can nest Attributes under these tags.
 	NewAttributes     []Attributes `kmip:"NEW_ATTRIBUTE"`
 	CurrentAttributes []Attributes `kmip:"CURRENT_ATTRIBUTE"`
 }
@@ -188,6 +193,10 @@ func (a *Attributes) AfterUnmarshalKMIP() {
 	a.AfterUnmarshalKMIPWithSeenFields(nil)
 }
 
+// AfterUnmarshalKMIPWithSeenFields normalizes alternate KMIP 2.0 encodings into
+// Values. It preserves nested NEW_ATTRIBUTE/CURRENT_ATTRIBUTE values and falls
+// back to legacy ATTRIBUTE_NAME/ATTRIBUTE_VALUE only when no richer shape was
+// present.
 func (a *Attributes) AfterUnmarshalKMIPWithSeenFields(seen map[string]bool) {
 	for _, attr := range a.NewAttributes {
 		if v := attr.Attribute(); v.Name != "" {
@@ -283,6 +292,9 @@ func NewAttributeValues(attrs kmip.Attributes) AttributeValues {
 	return values
 }
 
+// Set updates both Values and pointer fields: Values is convenient for callers,
+// while pointer fields let the encoder emit direct KMIP 2.0 attribute tags and
+// still include explicit zero values.
 func (a *AttributeValues) Set(attr kmip.Attribute) {
 	a.Values = append(a.Values, attr)
 
@@ -507,7 +519,9 @@ func attributeValueByName(name string) (interface{}, error) {
 
 // CreateRequest is the KMIP 2.0 Create request payload.
 type CreateRequest struct {
-	ObjectType             kmip.Enum  `kmip:"OBJECT_TYPE,required"`
+	ObjectType kmip.Enum `kmip:"OBJECT_TYPE,required"`
+	// Optional on the wire so legacy TEMPLATE_ATTRIBUTE payloads can be decoded
+	// into the same value-typed field in AfterUnmarshalKMIP.
 	Attributes             Attributes `kmip:"ATTRIBUTES"`
 	ProtectionStorageMasks kmip.Enum  `kmip:"PROTECTION_STORAGE_MASKS"`
 
