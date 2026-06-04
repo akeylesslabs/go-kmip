@@ -390,6 +390,8 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 		}
 		if fieldIdx == -1 {
 			for i, f := range structD.fields {
+				// ANY_TAG is a single catch-all fallback; if a struct declares multiple
+				// ANY_TAG fields, the first one wins.
 				if f.tag == ANY_TAG {
 					fieldIdx = i
 					break
