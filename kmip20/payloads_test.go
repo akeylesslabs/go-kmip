@@ -16,6 +16,62 @@ func TestPayloadRegistration(t *testing.T) {
 	respPayload, err := kmip.NewResponsePayload(ProtocolVersion, kmip.OPERATION_CREATE)
 	require.NoError(t, err)
 	require.IsType(t, &CreateResponse{}, respPayload)
+
+	activateReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_ACTIVATE)
+	require.NoError(t, err)
+	require.IsType(t, &kmip.ActivateRequest{}, activateReqPayload)
+
+	activateRespPayload, err := kmip.NewResponsePayload(ProtocolVersion, kmip.OPERATION_ACTIVATE)
+	require.NoError(t, err)
+	require.IsType(t, &kmip.ActivateResponse{}, activateRespPayload)
+
+	getAttrsReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_GET_ATTRIBUTES)
+	require.NoError(t, err)
+	require.IsType(t, &GetAttributesRequest{}, getAttrsReqPayload)
+
+	getAttrsRespPayload, err := kmip.NewResponsePayload(ProtocolVersion, kmip.OPERATION_GET_ATTRIBUTES)
+	require.NoError(t, err)
+	require.IsType(t, &GetAttributesResponse{}, getAttrsRespPayload)
+
+	getAttrListReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_GET_ATTRIBUTE_LIST)
+	require.NoError(t, err)
+	require.IsType(t, &GetAttributeListRequest{}, getAttrListReqPayload)
+
+	getAttrListRespPayload, err := kmip.NewResponsePayload(ProtocolVersion, kmip.OPERATION_GET_ATTRIBUTE_LIST)
+	require.NoError(t, err)
+	require.IsType(t, &GetAttributeListResponse{}, getAttrListRespPayload)
+
+	encryptReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_ENCRYPT)
+	require.NoError(t, err)
+	require.IsType(t, &EncryptRequest{}, encryptReqPayload)
+
+	decryptReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_DECRYPT)
+	require.NoError(t, err)
+	require.IsType(t, &DecryptRequest{}, decryptReqPayload)
+
+	revokeReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_REVOKE)
+	require.NoError(t, err)
+	require.IsType(t, &RevokeRequest{}, revokeReqPayload)
+
+	revokeRespPayload, err := kmip.NewResponsePayload(ProtocolVersion, kmip.OPERATION_REVOKE)
+	require.NoError(t, err)
+	require.IsType(t, &RevokeResponse{}, revokeRespPayload)
+
+	rekeyReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_REKEY)
+	require.NoError(t, err)
+	require.IsType(t, &ReKeyRequest{}, rekeyReqPayload)
+
+	rekeyRespPayload, err := kmip.NewResponsePayload(ProtocolVersion, kmip.OPERATION_REKEY)
+	require.NoError(t, err)
+	require.IsType(t, &ReKeyResponse{}, rekeyRespPayload)
+
+	deleteAttrReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_DELETE_ATTRIBUTE)
+	require.NoError(t, err)
+	require.IsType(t, &DeleteAttributeRequest{}, deleteAttrReqPayload)
+
+	deleteAttrRespPayload, err := kmip.NewResponsePayload(ProtocolVersion, kmip.OPERATION_DELETE_ATTRIBUTE)
+	require.NoError(t, err)
+	require.IsType(t, &DeleteAttributeResponse{}, deleteAttrRespPayload)
 }
 
 func TestPayloadRegistrationDoesNotReplaceDefaultPayloads(t *testing.T) {

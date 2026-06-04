@@ -840,6 +840,11 @@ const (
 	ATTRIBUTE_NAME_KEY_VALUE_PRESENT                = "Key Value Present"
 	ATTRIBUTE_NAME_KEY_VALUE_LOCATION               = "Key Value Location"
 	ATTRIBUTE_NAME_ORIGINAL_CREATION_DATE           = "Original Creation Date"
+	ATTRIBUTE_NAME_SENSITIVE                        = "Sensitive"
+	ATTRIBUTE_NAME_ALWAYS_SENSITIVE                 = "Always Sensitive"
+	ATTRIBUTE_NAME_EXTRACTABLE                      = "Extractable"
+	ATTRIBUTE_NAME_NEVER_EXTRACTABLE                = "Never Extractable"
+	ATTRIBUTE_NAME_REPLACE_EXISTING                 = "Replace Existing"
 )
 
 // kmip query functions

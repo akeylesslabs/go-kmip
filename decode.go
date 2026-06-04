@@ -80,6 +80,18 @@ func (d *Decoder) peekTag() (t Tag, err error) {
 	return
 }
 
+func (d *Decoder) peekType() (t Type, err error) {
+	b, err := d.s.ReadByte()
+	if err != nil {
+		return 0, err
+	}
+	if err = d.s.UnreadByte(); err != nil {
+		return 0, err
+	}
+
+	return Type(b), nil
+}
+
 func (d *Decoder) expectTag(expected Tag) error {
 	t, err := d.readTag()
 	if err != nil {
@@ -292,11 +304,6 @@ func (d *Decoder) decodeValue(f field, t reflect.Type, ff reflect.Value) (n int,
 		sD.tag = f.tag
 		n, err = d.decode(vv, sD)
 
-		// invoke post-decode hook on this decoded struct
-		if h, ok := vv.Interface().(AfterUnmarshalKMIP); ok {
-			h.AfterUnmarshalKMIP()
-		}
-
 		if batchItem, ok := vv.Interface().(*RequestBatchItem); ok {
 			batchItem.protocolVersion = ProtocolVersion{}
 		}
@@ -338,24 +345,65 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 	dd := NewDecoder(io.LimitReader(d.r, int64(expectedLen)))
 	dd.protocolVersion = d.protocolVersion
 
-	for _, f := range structD.fields {
+	seen := make([]bool, len(structD.fields))
+	for actualLen < expectedLen {
 		var tag Tag
 		tag, err = dd.peekTag()
 
-		if err == io.EOF && !f.required {
+		if err == io.EOF {
 			err = nil
-			continue
+			break
 		}
 
 		if err != nil {
-			err = errors.Wrapf(err, "error reading field %v", f.name)
+			err = errors.Wrap(err, "error reading field")
 			return
 		}
 
-		if !f.required && tag != f.tag && f.tag != ANY_TAG {
-			continue
+		var typ Type
+		typ, err = dd.peekType()
+		if err != nil {
+			err = errors.Wrap(err, "error reading field type")
+			return
 		}
 
+		fieldIdx := -1
+		fallbackFieldIdx := -1
+		for i, f := range structD.fields {
+			if f.tag == tag {
+				// Prefer an exact tag+type match. Keep the first tag-only match as
+				// a fallback for dynamic fields whose concrete TTLV type is chosen
+				// by BuildFieldValue at decode time.
+				if fallbackFieldIdx == -1 {
+					fallbackFieldIdx = i
+				}
+				if f.typ == typ {
+					fieldIdx = i
+					break
+				}
+			}
+		}
+		if fieldIdx == -1 {
+			// No static type matched; decode through the tag-only field and let
+			// decodeValue resolve dynamic interface fields.
+			fieldIdx = fallbackFieldIdx
+		}
+		if fieldIdx == -1 {
+			for i, f := range structD.fields {
+				// ANY_TAG is a single catch-all fallback; if a struct declares multiple
+				// ANY_TAG fields, the first one wins.
+				if f.tag == ANY_TAG {
+					fieldIdx = i
+					break
+				}
+			}
+		}
+		if fieldIdx == -1 {
+			err = errors.Errorf("unexpected tag %x", tag)
+			return
+		}
+
+		f := structD.fields[fieldIdx]
 		var (
 			nn int
 			v  interface{}
@@ -364,7 +412,9 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 		ff := rv.FieldByIndex(f.idx)
 
 		if f.sliceof {
-			ff.Set(reflect.MakeSlice(ff.Type(), 0, 0))
+			if !seen[fieldIdx] {
+				ff.Set(reflect.MakeSlice(ff.Type(), 0, 0))
+			}
 
 			for {
 				nn, v, err = dd.decodeValue(f, ff.Type().Elem(), rv)
@@ -377,7 +427,7 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 				actualLen += uint32(nn)
 
 				if !f.skip {
-					ff.Set(reflect.Append(ff, reflect.ValueOf(v)))
+					ff.Set(reflect.Append(ff, fieldValue(ff.Type().Elem(), v)))
 				}
 
 				if actualLen >= expectedLen {
@@ -394,6 +444,11 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 				}
 			}
 		} else {
+			if seen[fieldIdx] {
+				err = errors.Errorf("duplicate field %v", f.name)
+				return
+			}
+
 			nn, v, err = dd.decodeValue(f, ff.Type(), rv)
 			if err != nil {
 				err = errors.Wrapf(err, "error reading field %v", f.name)
@@ -404,7 +459,7 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 			actualLen += uint32(nn)
 
 			if !f.skip {
-				ff.Set(reflect.ValueOf(v))
+				ff.Set(fieldValue(ff.Type(), v))
 			}
 
 			if h, ok := v.(RequestHeader); ok {
@@ -414,11 +469,44 @@ func (d *Decoder) decode(rv reflect.Value, structD *structDesc) (n int, err erro
 				dd.protocolVersion = h.Version
 			}
 		}
+
+		seen[fieldIdx] = true
+	}
+
+	for i, f := range structD.fields {
+		if f.required && !seen[i] {
+			err = errors.Errorf("missing required field %v", f.name)
+			return
+		}
 	}
 
 	if actualLen != expectedLen {
 		err = errors.Errorf("error reading structure expected %d != actual %d", expectedLen, actualLen)
 	}
 
+	if rv.CanAddr() {
+		seenFields := make(map[string]bool, len(structD.fields))
+		for i, f := range structD.fields {
+			seenFields[f.name] = seen[i]
+		}
+		if h, ok := rv.Addr().Interface().(AfterUnmarshalKMIPWithSeenFields); ok {
+			h.AfterUnmarshalKMIPWithSeenFields(seenFields)
+		} else if h, ok := rv.Addr().Interface().(AfterUnmarshalKMIP); ok {
+			// Fallback to legacy hook to mirror decodeValue() behavior
+			h.AfterUnmarshalKMIP()
+		}
+	}
+
 	return
+}
+
+func fieldValue(t reflect.Type, v interface{}) reflect.Value {
+	vv := reflect.ValueOf(v)
+	if t.Kind() != reflect.Ptr {
+		return vv
+	}
+
+	ptr := reflect.New(t.Elem())
+	ptr.Elem().Set(vv)
+	return ptr
 }

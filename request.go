@@ -71,6 +71,7 @@ type MessageExtension struct {
 type RevocationReason struct {
 	Tag `kmip:"REVOCATION_REASON"`
 
-	RevocationReasonCode Enum   `kmip:"REVOCATION_REASON_CODE"`
-	RevocationMessage    string `kmip:"REVOCATION_REASON"`
+	RevocationReasonCode Enum `kmip:"REVOCATION_REASON_CODE"`
+	// KMIP 1.x and 2.0 both define the message under REVOCATION_MESSAGE.
+	RevocationMessage string `kmip:"REVOCATION_MESSAGE"`
 }

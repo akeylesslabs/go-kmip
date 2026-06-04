@@ -92,9 +92,16 @@ type ActivateResponse struct {
 
 // RevokeRequest is a Revoke Request Payload
 type RevokeRequest struct {
-	UniqueIdentifier string           `kmip:"UNIQUE_IDENTIFIER"`
-	RevocationReason RevocationReason `kmip:"REVOCATION_REASON,required"`
-	CompromiseDate   time.Time        `kmip:"COMPROMISE_DATE"`
+	UniqueIdentifier         string           `kmip:"UNIQUE_IDENTIFIER"`
+	RevocationReason         RevocationReason `kmip:"REVOCATION_REASON,required"`
+	CompromiseOccurrenceDate time.Time        `kmip:"COMPROMISE_OCCURRENCE_DATE"`
+	CompromiseDate           time.Time        `kmip:"COMPROMISE_DATE"`
+}
+
+func (r *RevokeRequest) AfterUnmarshalKMIP() {
+	if r.CompromiseOccurrenceDate.IsZero() {
+		r.CompromiseOccurrenceDate = r.CompromiseDate
+	}
 }
 
 // RevokeResponse is a Revoke Response Payload
