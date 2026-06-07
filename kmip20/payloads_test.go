@@ -49,6 +49,10 @@ func TestPayloadRegistration(t *testing.T) {
 	require.NoError(t, err)
 	require.IsType(t, &DecryptRequest{}, decryptReqPayload)
 
+	queryReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_QUERY)
+	require.NoError(t, err)
+	require.IsType(t, &QueryRequest{}, queryReqPayload)
+
 	revokeReqPayload, err := kmip.NewRequestPayload(ProtocolVersion, kmip.OPERATION_REVOKE)
 	require.NoError(t, err)
 	require.IsType(t, &RevokeRequest{}, revokeReqPayload)
@@ -78,6 +82,10 @@ func TestPayloadRegistrationDoesNotReplaceDefaultPayloads(t *testing.T) {
 	reqPayload, err := kmip.NewRequestPayload(kmip.ProtocolVersion{Major: 1, Minor: 4}, kmip.OPERATION_CREATE)
 	require.NoError(t, err)
 	require.IsType(t, &kmip.CreateRequest{}, reqPayload)
+
+	reqPayload, err = kmip.NewRequestPayload(kmip.ProtocolVersion{Major: 1, Minor: 4}, kmip.OPERATION_QUERY)
+	require.NoError(t, err)
+	require.IsType(t, &kmip.QueryRequest{}, reqPayload)
 }
 
 func TestDecodeRequestUsesKMIP20PayloadForKMIP20Version(t *testing.T) {
@@ -104,6 +112,34 @@ func TestDecodeRequestUsesKMIP20PayloadForKMIP20Version(t *testing.T) {
 	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
 	require.Len(t, decoded.BatchItems, 1)
 	require.IsType(t, CreateRequest{}, decoded.BatchItems[0].RequestPayload)
+}
+
+func TestDecodeQueryRequestUsesKMIP20PayloadForKMIP20Version(t *testing.T) {
+	req := kmip.Request{
+		Header: kmip.RequestHeader{
+			Version:    ProtocolVersion,
+			BatchCount: 1,
+		},
+		BatchItems: []kmip.RequestBatchItem{
+			{
+				Operation: kmip.OPERATION_QUERY,
+				RequestPayload: QueryRequest{
+					QueryFunctions: []kmip.Enum{kmip.QUERY_OPERATIONS},
+				},
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	require.NoError(t, kmip.NewEncoder(&buf).Encode(req))
+
+	var decoded kmip.Request
+	require.NoError(t, kmip.NewDecoder(&buf).Decode(&decoded))
+	require.Len(t, decoded.BatchItems, 1)
+	require.IsType(t, QueryRequest{}, decoded.BatchItems[0].RequestPayload)
+
+	query := decoded.BatchItems[0].RequestPayload.(QueryRequest)
+	require.Equal(t, []kmip.Enum{kmip.QUERY_OPERATIONS}, query.QueryFunctions)
 }
 
 func TestDecodeResponseUsesKMIP20PayloadForKMIP20Version(t *testing.T) {
