@@ -42,6 +42,9 @@ func registerRequestPayloads() {
 	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_DECRYPT, func() interface{} {
 		return &DecryptRequest{}
 	})
+	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_QUERY, func() interface{} {
+		return &QueryRequest{}
+	})
 	kmip.RegisterRequestPayloadFactory(ProtocolVersion, kmip.OPERATION_REGISTER, func() interface{} {
 		return &RegisterRequest{}
 	})
@@ -588,6 +591,19 @@ type GetAttributeListRequest struct {
 type GetAttributeListResponse struct {
 	UniqueIdentifier    string      `kmip:"UNIQUE_IDENTIFIER,required"`
 	AttributeReferences []kmip.Enum `kmip:"ATTRIBUTE_REFERENCE"`
+}
+
+// QueryRequest is the KMIP 2.0 Query request payload.
+type QueryRequest struct {
+	QueryFunctions []kmip.Enum `kmip:"QUERY_FUNCTION,required"`
+}
+
+func (r QueryRequest) KMIPProtocolVersion() kmip.ProtocolVersion {
+	return ProtocolVersion
+}
+
+func (r QueryRequest) GetQueryFunctions() []kmip.Enum {
+	return r.QueryFunctions
 }
 
 // EncryptRequest is the KMIP 2.0 Encrypt request payload.
